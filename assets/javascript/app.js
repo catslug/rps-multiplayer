@@ -31,7 +31,7 @@ database.ref("status").on("value", function(snapshot) {
 
 database.ref("status/round").on("value", function(snapshot) {
 	
-// This isn't working.
+// This isn't working, because round isn't working. 
 	if (snapshot.val() > 0) {
 		$("#rps-div-left").empty();
 		$("#rps-div-right").empty();
@@ -330,10 +330,10 @@ function resetChoices() {
 			round++; 
 			console.log("line 325 round is " + round)
 
-				// Round did not increment. FIX THIS. 
+				// Round did not increment. FIX THIS. Nothing works. I'm tired.
 			database.ref("status").update({
-				status: status,
-				round: round
+				status: status,	
+				round: round++
 			})	
 		});	
 
