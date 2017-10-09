@@ -11,6 +11,11 @@ firebase.initializeApp(config);
 
 var database = firebase.database();
 var timer
+var wins1 = 0;
+var wins2 = 0; 
+var loss1 = 0;
+var loss2 = 0;
+var round = 1;
 
 ///////////////////////////////////////////////////////////////////////////
 /// Listeners for database changes
@@ -29,14 +34,25 @@ database.ref("status").on("value", function(snapshot) {
 	$("#result").html(snapshot.child("status").val());
 })
 
-database.ref("status/round").on("value", function(snapshot) {
+// database.ref("status/round").on("value", function(snapshot) {
 	
-// This isn't working, because round isn't working. 
-	if (snapshot.val() > 0) {
-		$("#rps-div-left").empty();
-		$("#rps-div-right").empty();
-		choicesToTheDomLeft();
-		choicesToTheDomRight();
+// // This isn't working properly, because round isn't working. 
+// 	if (snapshot.val() > 0) {
+// 		$("#rps-div-left").empty();
+// 		$("#rps-div-right").empty();
+// 		choicesToTheDomLeft();
+// 		choicesToTheDomRight();
+// 	}
+// })
+
+database.ref("status/round").on("value", function(snapshot) {
+	currentRound = snapshot.val();
+	console.log(currentRound);
+
+	if (currentRound === 3) {
+		// The button shows automatically. HA HAHAHA HA AHAH AH BUTTON DOESN'T WORK. It's fine. FINE. 
+		$("<button id='resetBtn'>").text("Retry?").	addClass("buttonStyle").appendTo("#buttonSpot");
+		console.log("button was created");
 	}
 })
 
@@ -62,16 +78,20 @@ $(document).ready(function() {
 	$("#startBtn").on("click", function() {
 		var userName = $("#name-input").val();	
 
+		// Question: Should this be a function? That I can re-call for restart? 
 		database.ref().once("value").then(function(snapshot) {
 			var checkIfPlayerOne = snapshot.child("playerOne").child("playerName").exists();
 			var checkIfPlayerTwo = snapshot.child("playerTwo").child("playerName").exists();
 
 			if (!checkIfPlayerOne) {
 
+				wins1 = 0;
+				loss1 = 0;
+
 				database.ref("playerOne").set({
 					playerName: userName,
-					wins: 0,
-					losses: 0
+					wins: wins1,
+					losses: loss1
 				})
 
 				$("#player1").empty();
@@ -92,16 +112,19 @@ $(document).ready(function() {
 
 				database.ref("status").set({
 					status: status,
-					round: 0
+					round: round
 				})
 			}
 
 			else if (!checkIfPlayerTwo) {
 				
+				wins2 = 0;
+				loss2 = 0;
+
 				database.ref("playerTwo").set({
 					playerName: userName,
-					wins: 0,
-					losses: 0
+					wins: wins2,
+					losses: loss2
 				})
 
 				$("#player2").empty();
@@ -125,7 +148,27 @@ $(document).ready(function() {
 				})					
 			};
 		})
-		console.log(userName)
+	})
+
+	$("#resetBtn").on("click", function() {
+		$("#resetBtn").remove();
+		// restart. but how do I get it to just show the choices to the relevant page.
+		round = 1;
+
+		database.ref().on("value", function(snapshot) {
+			currentPlayer = snapshot.child(key).val();
+			if (currentPlayer === playerOne) {
+				choicesToTheDomLeft();
+			}
+
+			else if (currentPlayer === playerTwo) {
+				choicesToTheDomRight();
+			}
+
+			database.ref("status").update({
+				round: round
+			})
+		})
 	})
 })
 
@@ -155,6 +198,7 @@ function choicesToTheDomRight() {
 
 // handles events when player 1 makes an RPS selection, saves it in firebase
 $(document).on("click", ".rockPaperScissorsOne", function() {
+	round++;
 	var userChoice = $(this).attr("data-rps");
 	$(".rps-div-left").empty();
 	$("<p>").text(userChoice).addClass("userPickedMe").appendTo(".rps-div-left");
@@ -168,6 +212,7 @@ $(document).on("click", ".rockPaperScissorsOne", function() {
 
 // handles events when player 2 makes an RPS selection, saves it in firebase
 $(document).on("click", ".rockPaperScissorsTwo", function() {
+	round++;
 	var userChoice = $(this).attr("data-rps");
 	$(".rps-div-right").empty();
 	$("<p>").text(userChoice).addClass("userPickedMe").appendTo(".rps-div-right");
@@ -193,12 +238,12 @@ function whoWonIt() {
 		}
 
 		else {
-			console.log("line 182, still waiting on other player!");
+			console.log("line 196, still waiting on other player!");
 		}
 	})
 }
 
-// compares the RPS choices of both users
+// Compares the RPS choices of both users and determines winner.
 function compareRPS(val1, val2) {
 	if (val1 === val2) {
 		console.log("you tied!");
@@ -245,16 +290,14 @@ function compareRPS(val1, val2) {
 
 // Function to check current database wins/losses, increment to new values, update in database
 function incrementWinLoss(playerWin, playerLoss) {
-	var wins
-	var losses
-
 	if (playerWin === "playerOne") {
 
 		database.ref("playerOne").once("value").then(function(snapshot) {
 
-			wins = Number(snapshot.child("playerOne").child("wins").val());
-			wins++;
+			// wins = Number(snapshot.child("playerOne").child("wins").val());
+			wins1++;
 			// I don't think wins are continuing to increment above 1. 
+			console.log("line 266 playerOne wins: " + wins1);
 
 			winner = snapshot.child("playerName").val(); 
 			console.log(winner);
@@ -269,16 +312,16 @@ function incrementWinLoss(playerWin, playerLoss) {
 			})
 
 			database.ref("playerOne").update({
-				wins: wins
+				wins: wins1
 			})
 		})
 
 		database.ref("playerTwo").once("value").then(function(snapshot) {
-			losses = Number(snapshot.child("playerTwo").child("losses").val());
-			losses++;
+			// losses = Number(snapshot.child("playerTwo").child("losses").val());
+			loss2++;
 
 			database.ref("playerTwo").update({
-				losses: losses
+				losses: loss2
 			})
 		})
 	}	
@@ -286,8 +329,8 @@ function incrementWinLoss(playerWin, playerLoss) {
 	else if (playerLoss === "playerOne") {
 
 		database.ref("playerTwo").once("value").then(function(snapshot) {
-			wins = Number(snapshot.child("playerTwo").child("wins").val());
-			wins++;
+			// wins = Number(snapshot.child("playerTwo").child("wins").val());
+			wins2++;
 
 			winner = snapshot.child("playerName").val();
 			console.log(winner);
@@ -302,39 +345,42 @@ function incrementWinLoss(playerWin, playerLoss) {
 			})
 
 			database.ref("playerTwo").update({
-				wins: wins
+				wins: wins2
 			})
 		})	
 
 		database.ref("playerOne").once("value").then(function(snapshot) {
 
-			losses = Number(snapshot.child("playerOne").child("losses").val());
-			losses++;
+			// losses = Number(snapshot.child("playerOne").child("losses").val());
+			loss2++;
 
 			database.ref("playerOne").update({
-				losses: losses
+				losses: loss2
 			}) 
 		})
 	}
 }
 
 function resetChoices() {
-	var timer = setTimeout(emptyTheDiv, 2000)
+	timer = setTimeout(emptyTheDiv, 2000)
 
 	function emptyTheDiv() {
 		var status = "Ready, set, go!"
 
+		database.ref("status").update({
+			status: status,	
+		});	
+
 		database.ref("status").once("value").then(function(snapshot) {
-			var round = Number(snapshot.child("status").child("round").val());
+			// var round = Number(snapshot.child("status").child("round").val());
 			console.log("line 324 round is " + round)
 			round++; 
 			console.log("line 325 round is " + round)
 
 				// Round did not increment. FIX THIS. Nothing works. I'm tired.
 			database.ref("status").update({
-				status: status,	
-				round: round++
-			})	
+				round: round
+			})
 		});	
 
 		clearTimeout(timer);
@@ -344,11 +390,33 @@ function resetChoices() {
 	database.ref("playerTwo/choice").remove();
 }
 
+// This doesn't work. If one player disconnects, both disconnect. Status doesn't update.
+// database.ref("playerOne").once("value", function(snapshot) {
+// 	if (snapshot.val()) {
+// 		database.ref("playerOne").onDisconnect().remove();
+
+// 		database.ref("status").update({
+// 			status: "Sorry, everyone disconnected. Everything is broken."
+// 		})
+// 	}
+// })
+
+// database.ref("playerTwo").once("value", function(snapshot) {
+// 	if (snapshot.val()) {
+// 		database.ref("playerTwo").onDisconnect().remove();
+
+// 		database.ref("status").update({
+// 			status: "Sorry, everyone disconnected. Everything is broken."
+// 		})
+// 	}
+// })
+
+
 // Timed 2 second reset, status shown in results div.
 	// Retry will empty results div (check), repopulate choicestothedom (nope, populating on both windows), 
 	// clear "choice" from firebase (check)
 	// 
-	// On refresh page too, you lose the choices but game doesn't reset.
+	// On refresh page / disconnect, you lose the choices but game doesn't reset.
 	// wins and losses aren't incrementing past 1. round is also obscurely stuck? 
 // OnDisconnect function to handle when one player leaves
 	// Reset wins and losses for all players.
