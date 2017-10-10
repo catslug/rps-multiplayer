@@ -56,3 +56,8 @@ header {
 	text-align: center;
 	margin-left: 34%;
 }
+
+.hideRPSChoices {
+	color: transparent;
+	background-color: transparent;
+}

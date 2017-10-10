@@ -10,6 +10,8 @@ var config = {
 firebase.initializeApp(config);
 
 var database = firebase.database();
+var usersThatConnectedRef = database.ref("/connected");
+var connectedUsersRef = database.ref(".info/connected");
 var timer
 var wins1 = 0;
 var wins2 = 0; 
@@ -17,14 +19,39 @@ var loss1 = 0;
 var loss2 = 0;
 var round = 1;
 
+// connectedUsersRef.on("value", function(snapshot) {
+//   if (snapshot.val()) {
+//     var con = usersThatConnectedRef.push(true);
+//     con.onDisconnect().remove();
+//   }
+// });
+
 ///////////////////////////////////////////////////////////////////////////
 /// Listeners for database changes
+// database.ref().on("child_added", function(snapshot) {
+// 	if (snapshot.key === "playerOne") {
+// 		$("#player1").html(snapshot.child("playerName").val());
+// 	}
+
+// 	else if (snapshot.key === "playerTwo") {
+// 		$("#player2").html(snapshot.child("playerName").val());;
+// 	}
+// });
+
 database.ref("playerOne/playerName").on("value", function(snapshot) {
-	$("#player1").html(snapshot.val());
-});
+	var checkIfExists = snapshot.val();
+
+	if (checkIfExists !== null) {
+		$("#player1").html(snapshot.val());
+	}
+})
 
 database.ref("playerTwo/playerName").on("value", function(snapshot) {
-	$("#player2").html(snapshot.val());
+	var checkIfExists = snapshot.val();
+	
+	if (checkIfExists !== null) {
+		$("#player2").html(snapshot.val());
+	}
 })
 
 database.ref("status").on("value", function(snapshot) {
@@ -34,25 +61,13 @@ database.ref("status").on("value", function(snapshot) {
 	$("#result").html(snapshot.child("status").val());
 })
 
-// database.ref("status/round").on("value", function(snapshot) {
-	
-// // This isn't working properly, because round isn't working. 
-// 	if (snapshot.val() > 0) {
-// 		$("#rps-div-left").empty();
-// 		$("#rps-div-right").empty();
-// 		choicesToTheDomLeft();
-// 		choicesToTheDomRight();
-// 	}
-// })
-
 database.ref("status/round").on("value", function(snapshot) {
 	currentRound = snapshot.val();
 	console.log(currentRound);
 
-	if (currentRound === 3) {
-		// The button shows automatically. HA HAHAHA HA AHAH AH BUTTON DOESN'T WORK. It's fine. FINE. 
-		$("<button id='resetBtn'>").text("Retry?").	addClass("buttonStyle").appendTo("#buttonSpot");
-		console.log("button was created");
+	if (currentRound % 3 === 0) {
+		$(".rps-div-right").removeClass("hideRPSChoices");
+		$(".rps-div-left").removeClass("hideRPSChoices");
 	}
 })
 
@@ -71,6 +86,11 @@ database.ref("playerOne/losses").on("value", function(snapshot) {
 database.ref("playerTwo/losses").on("value", function(snapshot) {
 	$("#playerTwoLosses").html(snapshot.val());
 })
+
+// This removes both players when one disconnects. 
+database.ref("playerOne").onDisconnect().remove();
+database.ref("playerTwo").onDisconnect().remove();
+
 ///////////////////////////////////////////////////////////////////////////
 
 // Handles Player name-inputs, initializes playerone/two DB stats, writes them to the DOM
@@ -78,7 +98,7 @@ $(document).ready(function() {
 	$("#startBtn").on("click", function() {
 		var userName = $("#name-input").val();	
 
-		// Question: Should this be a function? That I can re-call for restart? 
+		// Determines if playerOne and/or playerTwo exists, logs their info, sets initial stats.
 		database.ref().once("value").then(function(snapshot) {
 			var checkIfPlayerOne = snapshot.child("playerOne").child("playerName").exists();
 			var checkIfPlayerTwo = snapshot.child("playerTwo").child("playerName").exists();
@@ -96,8 +116,8 @@ $(document).ready(function() {
 
 				$("#player1").empty();
 				$("#player1").html(userName);
-				$("#playerOneWins").html("0");
-				$("#playerOneLosses").html("O");
+				$("#playerOneWins").html(wins1);
+				$("#playerOneLosses").html(loss1);
 				$("#user-input").empty();
 
 				var alertText = $("<p>");
@@ -129,8 +149,8 @@ $(document).ready(function() {
 
 				$("#player2").empty();
 				$("#player2").html(userName);
-				$("#playerTwoWins").html("0");
-				$("#playerTwoLosses").html("O");
+				$("#playerTwoWins").html(wins2);
+				$("#playerTwoLosses").html(loss2);
 				$("#user-input").empty();
 
 				var alertText = $("<p>");
@@ -149,30 +169,9 @@ $(document).ready(function() {
 			};
 		})
 	})
-
-	$("#resetBtn").on("click", function() {
-		$("#resetBtn").remove();
-		// restart. but how do I get it to just show the choices to the relevant page.
-		round = 1;
-
-		database.ref().on("value", function(snapshot) {
-			currentPlayer = snapshot.child(key).val();
-			if (currentPlayer === playerOne) {
-				choicesToTheDomLeft();
-			}
-
-			else if (currentPlayer === playerTwo) {
-				choicesToTheDomRight();
-			}
-
-			database.ref("status").update({
-				round: round
-			})
-		})
-	})
 })
 
-// writes RPS choices to Player 1's div, adds classes for styling and attr captures
+// writes RPS choices to playerOne's div, adds classes for styling and attr captures
 function choicesToTheDomLeft() {
 	var rps = ["rock", "paper", "scissors"]
 	var rpsDiv = $("<div>")
@@ -184,7 +183,7 @@ function choicesToTheDomLeft() {
 	rpsDiv.appendTo(".rps-div-left");
 }
 
-// writes RPS choices to Player 2's div, adds classes for styling and attr captures
+// writes RPS choices to playerTwo's div, adds classes for styling and attr captures
 function choicesToTheDomRight() {
 	var rps = ["rock", "paper", "scissors"]
 	var rpsDiv = $("<div>")
@@ -196,29 +195,37 @@ function choicesToTheDomRight() {
 	rpsDiv.appendTo(".rps-div-right");
 }
 
-// handles events when player 1 makes an RPS selection, saves it in firebase
+// handles events when playerOne makes a selection, saves it in firebase
 $(document).on("click", ".rockPaperScissorsOne", function() {
-	round++;
+	round++; // increments the round for player selection
 	var userChoice = $(this).attr("data-rps");
-	$(".rps-div-left").empty();
+	$(".rps-div-left").addClass("hideRPSChoices"); // hides the options after selection
 	$("<p>").text(userChoice).addClass("userPickedMe").appendTo(".rps-div-left");
 
 	database.ref("playerOne").update({
 		choice: userChoice
 	})
 
+	database.ref("status").update({
+		round: round
+	})
+
 	whoWonIt();
 })
 
-// handles events when player 2 makes an RPS selection, saves it in firebase
+// handles events when player 2 makes a selection, saves it in firebase
 $(document).on("click", ".rockPaperScissorsTwo", function() {
-	round++;
+	round++; // increments the round for player selection
 	var userChoice = $(this).attr("data-rps");
-	$(".rps-div-right").empty();
+	$(".rps-div-right").addClass("hideRPSChoices"); // hides the options after selection
 	$("<p>").text(userChoice).addClass("userPickedMe").appendTo(".rps-div-right");
 
 	database.ref("playerTwo").update({
 		choice: userChoice
+	})
+
+	database.ref("status").update({
+		round: round
 	})
 
 	whoWonIt();
@@ -236,53 +243,42 @@ function whoWonIt() {
 
 			compareRPS(playerOneChoice, playerTwoChoice);
 		}
-
-		else {
-			console.log("line 196, still waiting on other player!");
-		}
 	})
 }
 
 // Compares the RPS choices of both users and determines winner.
 function compareRPS(val1, val2) {
 	if (val1 === val2) {
-		console.log("you tied!");
 		$("#result").empty();
 		$("#result").html("You tied!");
 	}
 
 	else if (val1 === "rock") {
 		if (val2 === "paper") {
-			console.log("compare function player2 wins!");
 			incrementWinLoss("playerTwo", "playerOne");
 		}
 
 		else if (val2 === "scissors") {
-			console.log("compare function player1 wins!");
 			incrementWinLoss("playerOne", "playerTwo");
 		}
  	}
 
  	else if (val1 === "paper") {
  		if (val2 === "rock") {
- 			console.log("compare function player1 wins!");
  			incrementWinLoss("playerOne", "playerTwo");
  		}
 
  		else if (val2 === "scissors") {
- 			console.log("compare function player2 wins!");
  			incrementWinLoss("playerTwo", "playerOne");
  		}
  	}
 
  	else if (val1 === "scissors") {
  		if (val2 === "paper") {
- 			console.log("compare function player1 wins!");
  			incrementWinLoss("playerOne", "playerTwo");
  		}
 
  		else if (val2 === "rock") {
- 			console.log("compare function player2 wins!");
  			incrementWinLoss("playerTwo", "playerOne");
  		}
  	}
@@ -291,16 +287,11 @@ function compareRPS(val1, val2) {
 // Function to check current database wins/losses, increment to new values, update in database
 function incrementWinLoss(playerWin, playerLoss) {
 	if (playerWin === "playerOne") {
-
 		database.ref("playerOne").once("value").then(function(snapshot) {
 
-			// wins = Number(snapshot.child("playerOne").child("wins").val());
 			wins1++;
-			// I don't think wins are continuing to increment above 1. 
-			console.log("line 266 playerOne wins: " + wins1);
-
+			console.log("line 277 playerOne wins: " + wins1);
 			winner = snapshot.child("playerName").val(); 
-			console.log(winner);
 
 			var status = winner + " wins!";
 			var p = $("<p>");
@@ -317,7 +308,6 @@ function incrementWinLoss(playerWin, playerLoss) {
 		})
 
 		database.ref("playerTwo").once("value").then(function(snapshot) {
-			// losses = Number(snapshot.child("playerTwo").child("losses").val());
 			loss2++;
 
 			database.ref("playerTwo").update({
@@ -329,11 +319,9 @@ function incrementWinLoss(playerWin, playerLoss) {
 	else if (playerLoss === "playerOne") {
 
 		database.ref("playerTwo").once("value").then(function(snapshot) {
-			// wins = Number(snapshot.child("playerTwo").child("wins").val());
 			wins2++;
 
 			winner = snapshot.child("playerName").val();
-			console.log(winner);
 
 			var status = winner + " wins!"
 			var p = $("<p>");
@@ -350,8 +338,6 @@ function incrementWinLoss(playerWin, playerLoss) {
 		})	
 
 		database.ref("playerOne").once("value").then(function(snapshot) {
-
-			// losses = Number(snapshot.child("playerOne").child("losses").val());
 			loss2++;
 
 			database.ref("playerOne").update({
@@ -362,25 +348,15 @@ function incrementWinLoss(playerWin, playerLoss) {
 }
 
 function resetChoices() {
-	timer = setTimeout(emptyTheDiv, 2000)
+	timer = setTimeout(emptyTheDiv, 2000);
+	round++;
 
 	function emptyTheDiv() {
-		var status = "Ready, set, go!"
+		var status = "Ready, set, go!";
 
 		database.ref("status").update({
 			status: status,	
-		});	
-
-		database.ref("status").once("value").then(function(snapshot) {
-			// var round = Number(snapshot.child("status").child("round").val());
-			console.log("line 324 round is " + round)
-			round++; 
-			console.log("line 325 round is " + round)
-
-				// Round did not increment. FIX THIS. Nothing works. I'm tired.
-			database.ref("status").update({
-				round: round
-			})
+			round: round
 		});	
 
 		clearTimeout(timer);
