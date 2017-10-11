@@ -45,16 +45,12 @@ database.ref("playerTwo/playerName").on("value", function(snapshot) {
 })
 
 database.ref("status").on("value", function(snapshot) {
-	console.log("status changed to" + snapshot.child("status").val());
-
 	$("#result").empty();
 	$("#result").html(snapshot.child("status").val());
 })
 
 database.ref("status/round").on("value", function(snapshot) {
 	var currentRound = snapshot.val();
-	console.log(currentRound);
-
 	if (currentRound === 3) {
 		$(".rps-div-right").removeClass("hideRPSChoices");
 		$(".rps-div-left").removeClass("hideRPSChoices");
@@ -69,18 +65,22 @@ database.ref("status/round").on("value", function(snapshot) {
 
 database.ref("playerOne/wins").on("value", function(snapshot) {
 	$("#playerOneWins").html(snapshot.val());
+	wins1 = snapshot.val();
 })
 
 database.ref("playerTwo/wins").on("value", function(snapshot) {
 	$("#playerTwoWins").html(snapshot.val());
+	wins2 = snapshot.val();
 })
 
 database.ref("playerOne/losses").on("value", function(snapshot) {
 	$("#playerOneLosses").html(snapshot.val());
+	loss1 = snapshot.val();
 })
 
 database.ref("playerTwo/losses").on("value", function(snapshot) {
 	$("#playerTwoLosses").html(snapshot.val());
+	loss2 = snapshot.val();
 })
 
 // This removes both players when one disconnects. Which is not as intended. 
@@ -231,7 +231,6 @@ $(document).on("click", ".rockPaperScissorsTwo", function() {
 
 // checks to see if both players have made selections, calls the compare function when true
 function whoWonIt() {
-	// changed this from once.then
 	database.ref().once("value").then(function(snapshot) {
 		var checkIfPlayerOneSelected = snapshot.child("playerOne").child("choice").exists();
 		var checkIfPlayerTwoSelected = snapshot.child("playerTwo").child("choice").exists();
@@ -241,6 +240,7 @@ function whoWonIt() {
 			var playerTwoChoice = snapshot.child("playerTwo").child("choice").val();
 
 			compareRPS(playerOneChoice, playerTwoChoice);
+			console.log("line 239: " + playerOneChoice + " " + playerTwoChoice);
 		}
 	})
 }
