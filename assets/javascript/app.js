@@ -10,8 +10,6 @@ var config = {
 firebase.initializeApp(config);
 
 var database = firebase.database();
-var usersThatConnectedRef = database.ref("/connected");
-var connectedUsersRef = database.ref(".info/connected");
 var timer
 var wins1 = 0;
 var wins2 = 0; 
@@ -96,7 +94,7 @@ $(document).ready(function() {
 		else {
 			var userName = $("#name-input").val();	
 
-		// Determines if playerOne and/or playerTwo exists, logs their info, sets initial stats.
+			// Determines if playerOne and/or playerTwo exists, logs their info, sets initial stats.
 			database.ref().once("value").then(function(snapshot) {
 				var checkIfPlayerOne = snapshot.child("playerOne").child("playerName").exists();
 				var checkIfPlayerTwo = snapshot.child("playerTwo").child("playerName").exists();
@@ -174,11 +172,9 @@ $(document).ready(function() {
 function choicesToTheDomLeft() {
 	var rps = ["rock", "paper", "scissors"]
 	var rpsDiv = $("<div>")
-
 	for (var i = 0; i < 3; i++) {
 		$("<p>").text(rps[i]).attr("data-rps", rps[i]).addClass("rockPaperScissors rockPaperScissorsOne").appendTo(rpsDiv);
 	}
-
 	rpsDiv.addClass("rpsDiv").appendTo(".rps-div-left");
 }
 
@@ -186,11 +182,9 @@ function choicesToTheDomLeft() {
 function choicesToTheDomRight() {
 	var rps = ["rock", "paper", "scissors"]
 	var rpsDiv = $("<div>")
-
 	for (var i = 0; i < 3; i++) {
 		$("<p>").text(rps[i]).attr("data-rps", rps[i]).addClass("rockPaperScissors rockPaperScissorsTwo").appendTo(rpsDiv);
 	}
-
 	rpsDiv.addClass("rpsDiv").appendTo(".rps-div-right");
 }
 
@@ -252,7 +246,14 @@ function whoWonIt() {
 function compareRPS(val1, val2) {
 	if (val1 === val2) {
 		$("#result").empty();
-		$("#result").html("You tied!");
+		var status = "You tied!";
+		var p = $("<p>");
+		p.text(status).addClass("resultsDivText").appendTo("#result");
+		resetChoices();
+
+		database.ref("status").update({
+			status: status
+		});
 	}
 
 	else if (val1 === "rock") {
