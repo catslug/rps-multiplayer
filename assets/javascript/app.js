@@ -176,7 +176,7 @@ function choicesToTheDomLeft() {
 		$("<p>").text(rps[i]).attr("data-rps", rps[i]).addClass("rockPaperScissors rockPaperScissorsOne").appendTo(rpsDiv);
 	}
 
-	rpsDiv.appendTo(".rps-div-left");
+	rpsDiv.addClass("rpsDiv").appendTo(".rps-div-left");
 }
 
 // writes RPS choices to playerTwo's div, adds classes for styling and attr captures
@@ -188,7 +188,7 @@ function choicesToTheDomRight() {
 		$("<p>").text(rps[i]).attr("data-rps", rps[i]).addClass("rockPaperScissors rockPaperScissorsTwo").appendTo(rpsDiv);
 	}
 
-	rpsDiv.appendTo(".rps-div-right");
+	rpsDiv.addClass("rpsDiv").appendTo(".rps-div-right");
 }
 
 // handles events when playerOne makes a selection, saves it in firebase
