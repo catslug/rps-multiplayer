@@ -306,19 +306,9 @@ function incrementWinLoss(playerWin, playerLoss) {
 			winner = snapshot.child("playerOne").child("playerName").val(); 
 
 			var status = winner + " wins!";
-			var pStatus = $("<p>");
-			var pResultRight = $("<p>");
-			var pResultLeft = $("<p>");
 			var oppoChoiceLeft = snapshot.child("playerOne").child("choice").val();
 			var oppoChoiceRight = snapshot.child("playerTwo").child("choice").val();
-			
-			// This updates on one side, but not both.
-			$(".userPickedMe").remove();
-			pStatus.text(status).addClass("resultsDivText").appendTo("#result");
-			pResultRight.text(oppoChoiceRight).addClass("userPickedMe").appendTo(".user-div-right");
-			pResultLeft.text(oppoChoiceLeft).addClass("userPickedMe").appendTo(".user-div-left");
-			
-			resetChoices();
+			showWhatYouPicked(status, oppoChoiceRight, oppoChoiceLeft);
 
 			database.ref("status").update({
 				status: status
@@ -327,10 +317,10 @@ function incrementWinLoss(playerWin, playerLoss) {
 	}	
 
 	else if (playerLoss === "playerOne") {
-		database.ref("playerTwo").once("value").then(function(snapshot) {
+		database.ref().once("value").then(function(snapshot) {
 			wins2++;
 			loss1++;
-			console.log("line 294 player 1 wins " + wins2 + " and player 2 losses " + loss1);
+
 			database.ref("playerOne").update({
 				losses: loss1
 			})
@@ -338,18 +328,31 @@ function incrementWinLoss(playerWin, playerLoss) {
 			database.ref("playerTwo").update({
 				wins: wins2
 			})
-			winner = snapshot.child("playerName").val();
 
-			var status = winner + " wins!"
-			var p = $("<p>");
-			p.text(winner + " wins!").addClass("resultsDivText").appendTo("#result");
-			resetChoices();
+			winner = snapshot.child("playerTwo").child("playerName").val();
+
+			var status = winner + " wins!";
+			var oppoChoiceLeft = snapshot.child("playerOne").child("choice").val();
+			var oppoChoiceRight = snapshot.child("playerTwo").child("choice").val();
+			showWhatYouPicked(status, oppoChoiceRight, oppoChoiceLeft);
 
 			database.ref("status").update({
 				status: status
 			})
 		})	
 	}
+}
+
+function showWhatYouPicked(status, choiceRight, choiceLeft) {
+	var pStatus = $("<p>");
+	var pResultRight = $("<p>");
+	var pResultLeft = $("<p>");	
+
+	$(".userPickedMe").remove();
+	pStatus.text(status).addClass("resultsDivText").appendTo("#result");
+	pResultRight.text(choiceRight).addClass("userPickedMe").appendTo(".user-div-right");
+	pResultLeft.text(choiceLeft).addClass("userPickedMe").appendTo(".user-div-left");
+	resetChoices();
 }
 
 function resetChoices() {
@@ -376,5 +379,4 @@ function resetChoices() {
 	// Reset wins and losses for all players.
 	// Allow new player to join as Player One or Player Two  
 
-// Need to fix the "choices shown" function 
 // Chat function 
