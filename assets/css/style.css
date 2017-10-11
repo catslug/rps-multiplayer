@@ -5,19 +5,20 @@
 body, html {
 	height: 100%;
 	line-height: 150%;
-	background-color: #f9f5fb;
+	background-color: #fff;
 }
 
 body#this-background {
-	background-color: #f9f5fb;
+	background-color: #fff;
 }
 
 header {
 	text-align: center;
 	width: 100%;
-	padding: 20px;
-	background-color: #eee1f5;
+	padding: 10px;
+	background-color: #f57e6b;
 	border-bottom: 1px solid #444;
+	height: 150px;
 }
 
 .container {
@@ -30,10 +31,11 @@ header {
 #user-input {
 	text-align: center;
 	padding: 20px;
+	margin: 30px;
 }
 
 .user-divs {
-	border: 1px solid #444;
+	border: 5px solid #f57e6b;
 	height: 300px;
 	position: relative;
 	text-align: center;
@@ -51,13 +53,59 @@ header {
 }
 
 .tally {
+	text-align: center;
+	padding: 10px;
+	margin: 10px;
+}
+
+.tally-left {
+	position: relative;
+	float: left;
+	margin-left: 30px;
+}
+
+.tally-right {
+	position: relative;
+	float: left;
+	margin-right: 30px;
+	right: -180px;
+}
+
+.tally-div {
 	position: absolute;
 	bottom: 5px;
-	text-align: center;
-	margin-left: 34%;
+	width: 100%;
 }
 
 .hideRPSChoices {
 	color: transparent;
 	background-color: transparent;
+}
+
+input#name-input {
+	border-bottom: 3px solid #f57e6b;
+	border-top: transparent;
+	border-left: transparent;
+	border-right: transparent;
+	padding: 10px;
+}
+
+input#name-input:focus {
+	background-color: #f5efee;
+	outline: none;
+}
+
+button#startBtn {
+	background-color: #f57e6b;
+	color: #fff;
+	padding: 10px;
+	margin: 10px;
+}
+
+button#startBtn:hover {
+	background-color: #ffafa3;
+}
+
+button#startBtn:focus {
+	background-color: #ffafa3;
 }

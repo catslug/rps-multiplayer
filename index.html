@@ -3,8 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- 	<link rel="stylesheet" type="text/css" href="assets/css/reset.css">
- -->	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
 	<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
@@ -14,13 +13,16 @@
 </head>
 <body id="this-background">
 
-	<header>Rock Paper Scissors</header>
+	<header>
+		<img src="assets/images/ropasci.png" alt="Rock Paper Scissors" />
+
+	</header>
 
 	<div class="container">
 
 		<div class="row" id="user-input">
-			<input type="text" id="name-input"></input>
-			<button type="button" id="startBtn">Start</button>
+			<input type="text" id="name-input" placeholder="name"></input>
+			<button type="button" id="startBtn" class="btn btn-md">Start</button>
 		</div>
 
 		<div class="row">
@@ -28,7 +30,10 @@
 				<div class="user-divs">
 					<p class="name-style"><span id="player1">Player 1</span></p>
 					<p class="rps-div-left"></p>
-					<p class="tally">Wins: <span id="playerOneWins"></span>  Losses: <span id="playerOneLosses"></span></p>
+					<div class="tally-div">
+						<p class="tally-left">Wins: <span id="playerOneWins"></span></p>
+						<p class="tally-right">Losses: <span id="playerOneLosses"></span></p>
+					</div>					
 				</div>
 			</div>
 			<div class="col-md-4">
@@ -41,7 +46,10 @@
 				<div class="user-divs">
 					<p class="name-style"><span id="player2">Player 2</span></p>
 					<p class="rps-div-right"></p>
-					<p class="tally">Wins: <span id="playerTwoWins"></span>  Losses: <span id="playerTwoLosses"></span></p>			
+					<div class="tally-div">
+						<p class="tally-left">Wins: <span id="playerTwoWins"></span></p>
+						<p class="tally-right">Losses: <span id="playerTwoLosses"></span></p>			
+					</div>
 				</div>
 			</div>
 		</div>
