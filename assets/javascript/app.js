@@ -19,13 +19,6 @@ var loss1 = 0;
 var loss2 = 0;
 var round = 1;
 
-// connectedUsersRef.on("value", function(snapshot) {
-//   if (snapshot.val()) {
-//     var con = usersThatConnectedRef.push(true);
-//     con.onDisconnect().remove();
-//   }
-// });
-
 ///////////////////////////////////////////////////////////////////////////
 /// Listeners for database changes
 database.ref("playerOne/playerName").on("value", function(snapshot) {
@@ -34,7 +27,7 @@ database.ref("playerOne/playerName").on("value", function(snapshot) {
 	if (checkIfExists !== null) {
 		$("#player1").html(snapshot.val());
 	}
-})
+});
 
 database.ref("playerTwo/playerName").on("value", function(snapshot) {
 	var checkIfExists = snapshot.val();
@@ -42,12 +35,12 @@ database.ref("playerTwo/playerName").on("value", function(snapshot) {
 	if (checkIfExists !== null) {
 		$("#player2").html(snapshot.val());
 	}
-})
+});
 
 database.ref("status").on("value", function(snapshot) {
 	$("#result").empty();
 	$("#result").html(snapshot.child("status").val());
-})
+});
 
 database.ref("status/round").on("value", function(snapshot) {
 	var currentRound = snapshot.val();
@@ -61,31 +54,35 @@ database.ref("status/round").on("value", function(snapshot) {
 			round: round
 		})
 	}
-})
+});
 
 database.ref("playerOne/wins").on("value", function(snapshot) {
 	$("#playerOneWins").html(snapshot.val());
 	wins1 = snapshot.val();
-})
+});
 
 database.ref("playerTwo/wins").on("value", function(snapshot) {
 	$("#playerTwoWins").html(snapshot.val());
 	wins2 = snapshot.val();
-})
+});
 
 database.ref("playerOne/losses").on("value", function(snapshot) {
 	$("#playerOneLosses").html(snapshot.val());
 	loss1 = snapshot.val();
-})
-
+});
+;
 database.ref("playerTwo/losses").on("value", function(snapshot) {
 	$("#playerTwoLosses").html(snapshot.val());
 	loss2 = snapshot.val();
-})
+});
 
 // This removes both players when one disconnects. Which is not as intended. 
 database.ref("playerOne").onDisconnect().remove();
 database.ref("playerTwo").onDisconnect().remove();
+
+database.ref().on("child_removed", function() {
+	database.ref("status").remove();
+});;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -356,34 +353,7 @@ function resetChoices() {
 	database.ref("playerTwo/choice").remove();
 }
 
-// This doesn't work. If one player disconnects, both disconnect. Status doesn't update.
-// database.ref("playerOne").once("value", function(snapshot) {
-// 	if (snapshot.val()) {
-// 		database.ref("playerOne").onDisconnect().remove();
 
-// 		database.ref("status").update({
-// 			status: "Sorry, everyone disconnected. Everything is broken."
-// 		})
-// 	}
-// })
-
-// database.ref("playerTwo").once("value", function(snapshot) {
-// 	if (snapshot.val()) {
-// 		database.ref("playerTwo").onDisconnect().remove();
-
-// 		database.ref("status").update({
-// 			status: "Sorry, everyone disconnected. Everything is broken."
-// 		})
-// 	}
-// })
-
-
-// Timed 2 second reset, status shown in results div.
-	// Retry will empty results div (check), repopulate choicestothedom (nope, populating on both windows), 
-	// clear "choice" from firebase (check)
-	// 
-	// On refresh page / disconnect, you lose the choices but game doesn't reset.
-	// wins and losses aren't incrementing past 1. round is also obscurely stuck? 
 // OnDisconnect function to handle when one player leaves
 	// Reset wins and losses for all players.
 	// Allow new player to join as Player One or Player Two  
