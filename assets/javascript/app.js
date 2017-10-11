@@ -89,78 +89,84 @@ database.ref().on("child_removed", function() {
 // Handles Player name-inputs, initializes playerone/two DB stats, writes them to the DOM
 $(document).ready(function() {
 	$("#startBtn").on("click", function() {
-		var userName = $("#name-input").val();	
+		if ($("#name-input").val() === "") {
+			alert("Please type in a name!")
+		}
+
+		else {
+			var userName = $("#name-input").val();	
 
 		// Determines if playerOne and/or playerTwo exists, logs their info, sets initial stats.
-		database.ref().once("value").then(function(snapshot) {
-			var checkIfPlayerOne = snapshot.child("playerOne").child("playerName").exists();
-			var checkIfPlayerTwo = snapshot.child("playerTwo").child("playerName").exists();
+			database.ref().once("value").then(function(snapshot) {
+				var checkIfPlayerOne = snapshot.child("playerOne").child("playerName").exists();
+				var checkIfPlayerTwo = snapshot.child("playerTwo").child("playerName").exists();
 
-			if (!checkIfPlayerOne) {
+				if (!checkIfPlayerOne) {
 
-				wins1 = 0;
-				loss1 = 0;
+					wins1 = 0;
+					loss1 = 0;
 
-				database.ref("playerOne").set({
-					playerName: userName,
-					wins: wins1,
-					losses: loss1
-				})
+					database.ref("playerOne").set({
+						playerName: userName,
+						wins: wins1,
+						losses: loss1
+					})
 
-				$("#player1").empty();
-				$("#player1").html(userName);
-				$("#playerOneWins").html(wins1);
-				$("#playerOneLosses").html(loss1);
-				$("#user-input").empty();
+					$("#player1").empty();
+					$("#player1").html(userName);
+					$("#playerOneWins").html(wins1);
+					$("#playerOneLosses").html(loss1);
+					$("#user-input").empty();
 
-				var alertText = $("<p>");
+					var alertText = $("<p>");
 
-				alertText.text(userName + ", you are Player 1.").appendTo("#user-input");
+					alertText.text(userName + ", you are Player 1.").appendTo("#user-input");
 
-				choicesToTheDomLeft();
+					choicesToTheDomLeft();
 
-				var status = "Waiting on another player to join."
-				$("#result").empty();
-				$("#result").html(status);
+					var status = "Waiting on another player to join."
+					$("#result").empty();
+					$("#result").html(status);
 
-				database.ref("status").set({
-					status: status,
-					round: round
-				})
-			}
+					database.ref("status").set({
+						status: status,
+						round: round
+					})
+				}
 
-			else if (!checkIfPlayerTwo) {
-				
-				wins2 = 0;
-				loss2 = 0;
+				else if (!checkIfPlayerTwo) {
+					
+					wins2 = 0;
+					loss2 = 0;
 
-				database.ref("playerTwo").set({
-					playerName: userName,
-					wins: wins2,
-					losses: loss2
-				})
+					database.ref("playerTwo").set({
+						playerName: userName,
+						wins: wins2,
+						losses: loss2
+					})
 
-				$("#player2").empty();
-				$("#player2").html(userName);
-				$("#playerTwoWins").html(wins2);
-				$("#playerTwoLosses").html(loss2);
-				$("#user-input").empty();
+					$("#player2").empty();
+					$("#player2").html(userName);
+					$("#playerTwoWins").html(wins2);
+					$("#playerTwoLosses").html(loss2);
+					$("#user-input").empty();
 
-				var alertText = $("<p>");
+					var alertText = $("<p>");
 
-				alertText.text(userName + ", you are Player 2.").appendTo("#user-input");
+					alertText.text(userName + ", you are Player 2.").appendTo("#user-input");
 
-				choicesToTheDomRight();	
+					choicesToTheDomRight();	
 
-				var status = userName + " has joined! You're ready to go."
-				$("#result").empty();
-				$("#result").html(status);
+					var status = userName + " has joined! You're ready to go."
+					$("#result").empty();
+					$("#result").html(status);
 
-				database.ref("status").update({
-					status: status
-				})					
-			};
-		})
+					database.ref("status").update({
+						status: status
+					})					
+				};
+			})
+		}
 	})
 })
 
@@ -357,3 +363,6 @@ function resetChoices() {
 // OnDisconnect function to handle when one player leaves
 	// Reset wins and losses for all players.
 	// Allow new player to join as Player One or Player Two  
+
+// Need to fix the "choices shown" function 
+// Chat function 
