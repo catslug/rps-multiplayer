@@ -28,16 +28,6 @@ var round = 1;
 
 ///////////////////////////////////////////////////////////////////////////
 /// Listeners for database changes
-// database.ref().on("child_added", function(snapshot) {
-// 	if (snapshot.key === "playerOne") {
-// 		$("#player1").html(snapshot.child("playerName").val());
-// 	}
-
-// 	else if (snapshot.key === "playerTwo") {
-// 		$("#player2").html(snapshot.child("playerName").val());;
-// 	}
-// });
-
 database.ref("playerOne/playerName").on("value", function(snapshot) {
 	var checkIfExists = snapshot.val();
 
@@ -62,12 +52,18 @@ database.ref("status").on("value", function(snapshot) {
 })
 
 database.ref("status/round").on("value", function(snapshot) {
-	currentRound = snapshot.val();
+	var currentRound = snapshot.val();
 	console.log(currentRound);
 
-	if (currentRound % 3 === 0) {
+	if (currentRound === 3) {
 		$(".rps-div-right").removeClass("hideRPSChoices");
 		$(".rps-div-left").removeClass("hideRPSChoices");
+		$(".userPickedMe").remove();
+		round = 1;
+
+		database.ref("status").update({
+			round: round
+		})
 	}
 })
 
@@ -87,7 +83,7 @@ database.ref("playerTwo/losses").on("value", function(snapshot) {
 	$("#playerTwoLosses").html(snapshot.val());
 })
 
-// This removes both players when one disconnects. 
+// This removes both players when one disconnects. Which is not as intended. 
 database.ref("playerOne").onDisconnect().remove();
 database.ref("playerTwo").onDisconnect().remove();
 
@@ -207,6 +203,7 @@ $(document).on("click", ".rockPaperScissorsOne", function() {
 	})
 
 	database.ref("status").update({
+		status: "",
 		round: round
 	})
 
@@ -225,6 +222,7 @@ $(document).on("click", ".rockPaperScissorsTwo", function() {
 	})
 
 	database.ref("status").update({
+		status: "",
 		round: round
 	})
 
@@ -233,6 +231,7 @@ $(document).on("click", ".rockPaperScissorsTwo", function() {
 
 // checks to see if both players have made selections, calls the compare function when true
 function whoWonIt() {
+	// changed this from once.then
 	database.ref().once("value").then(function(snapshot) {
 		var checkIfPlayerOneSelected = snapshot.child("playerOne").child("choice").exists();
 		var checkIfPlayerTwoSelected = snapshot.child("playerTwo").child("choice").exists();
@@ -288,9 +287,17 @@ function compareRPS(val1, val2) {
 function incrementWinLoss(playerWin, playerLoss) {
 	if (playerWin === "playerOne") {
 		database.ref("playerOne").once("value").then(function(snapshot) {
-
 			wins1++;
-			console.log("line 277 playerOne wins: " + wins1);
+			loss2++;
+			console.log("line 294 player 1 wins " + wins1 + " and player 2 losses " + loss2);
+			database.ref("playerOne").update({
+				wins: wins1
+			})
+
+			database.ref("playerTwo").update({
+				losses: loss2
+			})
+
 			winner = snapshot.child("playerName").val(); 
 
 			var status = winner + " wins!";
@@ -301,26 +308,21 @@ function incrementWinLoss(playerWin, playerLoss) {
 			database.ref("status").update({
 				status: status
 			})
-
-			database.ref("playerOne").update({
-				wins: wins1
-			})
-		})
-
-		database.ref("playerTwo").once("value").then(function(snapshot) {
-			loss2++;
-
-			database.ref("playerTwo").update({
-				losses: loss2
-			})
 		})
 	}	
 
 	else if (playerLoss === "playerOne") {
-
 		database.ref("playerTwo").once("value").then(function(snapshot) {
 			wins2++;
+			loss1++;
+			console.log("line 294 player 1 wins " + wins2 + " and player 2 losses " + loss1);
+			database.ref("playerOne").update({
+				losses: loss1
+			})
 
+			database.ref("playerTwo").update({
+				wins: wins2
+			})
 			winner = snapshot.child("playerName").val();
 
 			var status = winner + " wins!"
@@ -331,19 +333,7 @@ function incrementWinLoss(playerWin, playerLoss) {
 			database.ref("status").update({
 				status: status
 			})
-
-			database.ref("playerTwo").update({
-				wins: wins2
-			})
 		})	
-
-		database.ref("playerOne").once("value").then(function(snapshot) {
-			loss2++;
-
-			database.ref("playerOne").update({
-				losses: loss2
-			}) 
-		})
 	}
 }
 
