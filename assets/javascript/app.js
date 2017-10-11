@@ -192,8 +192,9 @@ function choicesToTheDomRight() {
 $(document).on("click", ".rockPaperScissorsOne", function() {
 	round++; // increments the round for player selection
 	var userChoice = $(this).attr("data-rps");
+	var p = $("<p>");
 	$(".rps-div-left").addClass("hideRPSChoices"); // hides the options after selection
-	$("<p>").text(userChoice).addClass("userPickedMe").appendTo(".rps-div-left");
+	p.text(userChoice).addClass("userPickedMe").appendTo(".user-div-left");
 
 	database.ref("playerOne").update({
 		choice: userChoice
@@ -211,8 +212,9 @@ $(document).on("click", ".rockPaperScissorsOne", function() {
 $(document).on("click", ".rockPaperScissorsTwo", function() {
 	round++; // increments the round for player selection
 	var userChoice = $(this).attr("data-rps");
+	var p = $("<p>");
 	$(".rps-div-right").addClass("hideRPSChoices"); // hides the options after selection
-	$("<p>").text(userChoice).addClass("userPickedMe").appendTo(".rps-div-right");
+	p.text(userChoice).addClass("userPickedMe").appendTo(".user-div-right");
 
 	database.ref("playerTwo").update({
 		choice: userChoice
@@ -290,10 +292,9 @@ function compareRPS(val1, val2) {
 // Function to check current database wins/losses, increment to new values, update in database
 function incrementWinLoss(playerWin, playerLoss) {
 	if (playerWin === "playerOne") {
-		database.ref("playerOne").once("value").then(function(snapshot) {
+		database.ref().once("value").then(function(snapshot) {
 			wins1++;
 			loss2++;
-			console.log("line 294 player 1 wins " + wins1 + " and player 2 losses " + loss2);
 			database.ref("playerOne").update({
 				wins: wins1
 			})
@@ -302,11 +303,21 @@ function incrementWinLoss(playerWin, playerLoss) {
 				losses: loss2
 			})
 
-			winner = snapshot.child("playerName").val(); 
+			winner = snapshot.child("playerOne").child("playerName").val(); 
 
 			var status = winner + " wins!";
-			var p = $("<p>");
-			p.text(status).addClass("resultsDivText").appendTo("#result");
+			var pStatus = $("<p>");
+			var pResultRight = $("<p>");
+			var pResultLeft = $("<p>");
+			var oppoChoiceLeft = snapshot.child("playerOne").child("choice").val();
+			var oppoChoiceRight = snapshot.child("playerTwo").child("choice").val();
+			
+			// This updates on one side, but not both.
+			$(".userPickedMe").remove();
+			pStatus.text(status).addClass("resultsDivText").appendTo("#result");
+			pResultRight.text(oppoChoiceRight).addClass("userPickedMe").appendTo(".user-div-right");
+			pResultLeft.text(oppoChoiceLeft).addClass("userPickedMe").appendTo(".user-div-left");
+			
 			resetChoices();
 
 			database.ref("status").update({

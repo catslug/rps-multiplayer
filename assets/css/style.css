@@ -16,7 +16,7 @@ body#this-background {
 
 header {
 	text-align: center;
-	width: 100%;
+	width: 100vw;
 	padding: 10px;
 	background-color: #f57e6b;
 	border-bottom: 1px solid #444;
@@ -61,6 +61,18 @@ header {
 
 .status-msg {
 	margin-top: 30%;
+}
+
+.userPickedMe {
+	font-size: 60px;
+	text-align: center;
+	padding-top: 55px;
+}
+
+.userHideMe {
+	background-color: transparent;
+	color: transparent;
+	display: none;
 }
 
 .tally {
