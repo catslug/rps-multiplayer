@@ -105,7 +105,7 @@ header {
 	background-color: transparent;
 }
 
-input#name-input {
+input#name-input, input#user-words {
 	border-bottom: 3px solid #f57e6b;
 	border-top: transparent;
 	border-left: transparent;
@@ -113,22 +113,35 @@ input#name-input {
 	padding: 10px;
 }
 
-input#name-input:focus {
+input#name-input:focus, input#user-words:focus {
 	background-color: #f5efee;
 	outline: none;
 }
 
-button#startBtn {
+button#startBtn, button#submit {
 	background-color: #f57e6b;
 	color: #fff;
 	padding: 10px;
 	margin: 10px;
 }
 
-button#startBtn:hover {
+button#startBtn:hover, button#submit:hover {
 	background-color: #ffafa3;
 }
 
-button#startBtn:focus {
+button#startBtn:focus, button #submit:hover {
 	background-color: #ffafa3;
+}
+
+#say-it {
+	height: 300px;	
+	border: 5px solid #f57e6b;
+	text-align: left;
+	margin-top: 50px;
+	margin-left: 30px;
+	margin-right: 30px;
+	background-color: #f5efee;
+	padding: 10px;
+	overflow: scroll; 
+	/*but this won't keep the chat focused ont he bottom*/
 }

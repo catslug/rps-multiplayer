@@ -16,6 +16,8 @@ var wins2 = 0;
 var loss1 = 0;
 var loss2 = 0;
 var round = 1;
+var currentPlayer
+var currentPlayerName
 
 ///////////////////////////////////////////////////////////////////////////
 /// Listeners for database changes
@@ -68,7 +70,7 @@ database.ref("playerOne/losses").on("value", function(snapshot) {
 	$("#playerOneLosses").html(snapshot.val());
 	loss1 = snapshot.val();
 });
-;
+
 database.ref("playerTwo/losses").on("value", function(snapshot) {
 	$("#playerTwoLosses").html(snapshot.val());
 	loss2 = snapshot.val();
@@ -78,9 +80,22 @@ database.ref("playerTwo/losses").on("value", function(snapshot) {
 database.ref("playerOne").onDisconnect().remove();
 database.ref("playerTwo").onDisconnect().remove();
 
+// Removes the status children so the page is reset when someone comes back later.
 database.ref().on("child_removed", function() {
 	database.ref("status").remove();
-});;
+	database.ref("chat").remove();
+});
+
+database.ref("chat").on("child_added", function(snapshot) {
+	console.log(snapshot.val());
+	var message = snapshot.val().message;
+	var sender = snapshot.val().sender;
+	var player = snapshot.val().player;
+
+	var chatText = $("<p>");
+
+	chatText.text(sender + ": " + message).appendTo("#say-it");	
+})
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +118,8 @@ $(document).ready(function() {
 
 					wins1 = 0;
 					loss1 = 0;
+					currentPlayer = "playerOne";
+					currentPlayerName = userName;
 
 					database.ref("playerOne").set({
 						playerName: userName,
@@ -136,6 +153,8 @@ $(document).ready(function() {
 					
 					wins2 = 0;
 					loss2 = 0;
+					currentPlayer = "playerTwo";
+					currentPlayerName = userName;
 
 					database.ref("playerTwo").set({
 						playerName: userName,
@@ -253,6 +272,8 @@ function compareRPS(val1, val2) {
 		p.text(status).addClass("resultsDivText").appendTo("#result");
 		resetChoices();
 
+		// find a way to call showWhatYouPicked();
+
 		database.ref("status").update({
 			status: status
 		});
@@ -356,7 +377,7 @@ function showWhatYouPicked(status, choiceRight, choiceLeft) {
 }
 
 function resetChoices() {
-	timer = setTimeout(emptyTheDiv, 2000);
+	timer = setTimeout(emptyTheDiv, 2500);
 	round++;
 
 	function emptyTheDiv() {
@@ -374,9 +395,21 @@ function resetChoices() {
 	database.ref("playerTwo/choice").remove();
 }
 
+$(document).ready(function() {
+	$("#submit").on("click", function() {
+		var chatMessage = $("#user-words").val().trim();
+		$("#user-words").val("");
+		var sender = currentPlayerName;
+		console.log(sender + " says " + chatMessage);
+
+		database.ref("chat").push({
+			message: chatMessage,
+			sender: sender,
+			player: currentPlayer
+		})
+	})
+})
 
 // OnDisconnect function to handle when one player leaves
 	// Reset wins and losses for all players.
 	// Allow new player to join as Player One or Player Two  
-
-// Chat function 
