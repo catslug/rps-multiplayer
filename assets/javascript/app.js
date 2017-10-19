@@ -86,6 +86,23 @@ database.ref().on("child_removed", function() {
 	database.ref("chat").remove();
 });
 
+database.ref().on("value", function(snapshot) {
+	var isPlayerOneChoice = snapshot.child("playerOne").child("choice").exists();
+	var isPlayerTwoChoice = snapshot.child("playerTwo").child("choice").exists();
+	var playerOneChoice = snapshot.child("playerOne").child("choice").val();
+	var playerTwoChoice = snapshot.child("playerTwo").child("choice").val();
+	console.log(playerOneChoice + " " + playerTwoChoice)
+
+	if (isPlayerOneChoice && isPlayerTwoChoice) {
+		var pResultRight = $("<p>");
+		var pResultLeft = $("<p>");	
+
+		$(".userPickedMe").remove();
+		pResultRight.text(playerTwoChoice).addClass("userPickedMe").appendTo(".user-div-right");
+		pResultLeft.text(playerOneChoice).addClass("userPickedMe").appendTo(".user-div-left");
+	}
+})
+
 database.ref("chat").on("child_added", function(snapshot) {
 	console.log(snapshot.val());
 	var message = snapshot.val().message;
