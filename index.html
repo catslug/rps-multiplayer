@@ -25,6 +25,12 @@
 		<div class="row" id="user-input">
 			<input type="text" id="name-input" placeholder="name"></input>
 			<button type="button" id="startBtn" class="btn btn-md">Start</button>
+			<div id="myModal" class="modal">
+				<span class="close">x</span>
+				<div class="modalContent">
+					<p>Please type in a name!</p>
+				</div>
+			</div>
 		</div>
 
 		<div class="row">
@@ -57,7 +63,7 @@
 		</div>
 
 		<div class="row">
-			<div class="chat-box">
+			<div class="chat-box col-md-12">
 				<div id="say-it">
 				</div>
 				<input id="user-words" type="text" placeholder="say something"></input>

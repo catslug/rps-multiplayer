@@ -18,14 +18,31 @@ var loss2 = 0;
 var round = 1;
 var currentPlayer
 var currentPlayerName
+var modal = $("#myModal");
+var span = $(".close");
 
-///////////////////////////////////////////////////////////////////////////
-/// Listeners for database changes
+//---------------------------Firebase database listeners--------------------------------//
+
+// -------Listens for change in player name; if change bc disconnect, alerts player to restart------//
 database.ref("playerOne/playerName").on("value", function(snapshot) {
 	var checkIfExists = snapshot.val();
 
 	if (checkIfExists !== null) {
 		$("#player1").html(snapshot.val());
+	}
+
+	else if (checkIfExists === null) {
+		$("#player1").html("Player 1");
+
+		if (currentPlayer === "playerTwo") {
+			var disconnectP = $("<p>");
+			var disconnectMsg = "Oops, it looks like your opponent ended the game. Simply restart to play with someone else!";
+			var resetButton = $("<button id='reset'>");
+			var refresh = $("<a id='refresh' href='https://catslug.github.io/rps-multiplayer/'>Restart</a>");
+			resetButton.addClass("btn btn-md")
+			disconnectP.html(disconnectMsg).appendTo("#buttonSpot");
+			resetButton.html(refresh).appendTo("#buttonSpot");
+		}
 	}
 });
 
@@ -35,13 +52,29 @@ database.ref("playerTwo/playerName").on("value", function(snapshot) {
 	if (checkIfExists !== null) {
 		$("#player2").html(snapshot.val());
 	}
+
+	else if (checkIfExists === null) {
+		$("#player1").html("Player 1");
+
+		if (currentPlayer === "playerOne") {
+			var disconnectP = $("<p>");
+			var disconnectMsg = "Oops, it looks like your opponent ended the game. Simply restart to play with someone else!";
+			var resetButton = $("<button id='reset'>");
+			var refresh = $("<a id='refresh' href='https://catslug.github.io/rps-multiplayer/'>Restart</a>");
+			resetButton.addClass("btn btn-md")
+			disconnectP.html(disconnectMsg).appendTo("#buttonSpot");
+			resetButton.html(refresh).appendTo("#buttonSpot");
+		}
+	}
 });
 
+//--------------------Updates the status on each page--------------------------//
 database.ref("status").on("value", function(snapshot) {
 	$("#result").empty();
 	$("#result").html(snapshot.child("status").val());
 });
 
+//----------------if in 3rd round, reset to 1st, display choices again--------------//
 database.ref("status/round").on("value", function(snapshot) {
 	var currentRound = snapshot.val();
 	if (currentRound === 3) {
@@ -56,6 +89,7 @@ database.ref("status/round").on("value", function(snapshot) {
 	}
 });
 
+//------------------updates player wins and losses on each page-------------------//
 database.ref("playerOne/wins").on("value", function(snapshot) {
 	$("#playerOneWins").html(snapshot.val());
 	wins1 = snapshot.val();
@@ -76,22 +110,18 @@ database.ref("playerTwo/losses").on("value", function(snapshot) {
 	loss2 = snapshot.val();
 });
 
-// This removes both players when one disconnects. Which is not as intended. 
-database.ref("playerOne").onDisconnect().remove();
-database.ref("playerTwo").onDisconnect().remove();
-
-// Removes the status children so the page is reset when someone comes back later.
-database.ref().on("child_removed", function() {
+//------------removes chat and status children from firebase when either player disconnects----------//  
+database.ref(currentPlayer).onDisconnect().remove(function(snapshot) {
 	database.ref("status").remove();
 	database.ref("chat").remove();
 });
 
+//-----------after winner has been determined, alerts each page to the opponent's choice---------//
 database.ref().on("value", function(snapshot) {
 	var isPlayerOneChoice = snapshot.child("playerOne").child("choice").exists();
 	var isPlayerTwoChoice = snapshot.child("playerTwo").child("choice").exists();
 	var playerOneChoice = snapshot.child("playerOne").child("choice").val();
 	var playerTwoChoice = snapshot.child("playerTwo").child("choice").val();
-	console.log(playerOneChoice + " " + playerTwoChoice)
 
 	if (isPlayerOneChoice && isPlayerTwoChoice) {
 		var pResultRight = $("<p>");
@@ -103,30 +133,31 @@ database.ref().on("value", function(snapshot) {
 	}
 })
 
-database.ref("chat").on("child_added", function(snapshot) {
-	console.log(snapshot.val());
-	var message = snapshot.val().message;
-	var sender = snapshot.val().sender;
-	var player = snapshot.val().player;
+////////////////game listeners conclude////////////////////
 
-	var chatText = $("<p>");
+//---------------------modal---------------------//
+function closeModal() {
+	$("#myModal").css("display", "none");
+}
 
-	chatText.text(sender + ": " + message).appendTo("#say-it");	
+$(".modal").on("click", function() {
+	$("#myModal").css("display", "none");
 })
 
-///////////////////////////////////////////////////////////////////////////
-
-// Handles Player name-inputs, initializes playerone/two DB stats, writes them to the DOM
+//---------initial game set up, user inputs, assigns initial status----------//
 $(document).ready(function() {
 	$("#startBtn").on("click", function() {
 		if ($("#name-input").val() === "") {
-			alert("Please type in a name!")
+			console.log("hi, I'm at the modal");
+			$("#myModal").css("display", "block");
+			$(".close").on("click", closeModal)
+			$("#myModal").on("click", closeModal);
 		}
 
 		else {
 			var userName = $("#name-input").val();	
 
-			// Determines if playerOne and/or playerTwo exists, logs their info, sets initial stats.
+			//----if playerOne is null, sets user to playerOne, else sets user to playerTwo----//
 			database.ref().once("value").then(function(snapshot) {
 				var checkIfPlayerOne = snapshot.child("playerOne").child("playerName").exists();
 				var checkIfPlayerTwo = snapshot.child("playerTwo").child("playerName").exists();
@@ -204,7 +235,7 @@ $(document).ready(function() {
 	})
 })
 
-// writes RPS choices to playerOne's div, adds classes for styling and attr captures
+//-----populates choices to playerOne's div-------//
 function choicesToTheDomLeft() {
 	var rps = ["rock", "paper", "scissors"]
 	var rpsDiv = $("<div>")
@@ -214,7 +245,7 @@ function choicesToTheDomLeft() {
 	rpsDiv.addClass("rpsDiv").appendTo(".rps-div-left");
 }
 
-// writes RPS choices to playerTwo's div, adds classes for styling and attr captures
+//-----populates choices to playerTwo's div-------//
 function choicesToTheDomRight() {
 	var rps = ["rock", "paper", "scissors"]
 	var rpsDiv = $("<div>")
@@ -224,7 +255,7 @@ function choicesToTheDomRight() {
 	rpsDiv.addClass("rpsDiv").appendTo(".rps-div-right");
 }
 
-// handles events when playerOne makes a selection, saves it in firebase
+//--------records playerOne's choice, calls function to see if both players have made a choice----//
 $(document).on("click", ".rockPaperScissorsOne", function() {
 	round++; // increments the round for player selection
 	var userChoice = $(this).attr("data-rps");
@@ -244,7 +275,7 @@ $(document).on("click", ".rockPaperScissorsOne", function() {
 	whoWonIt();
 })
 
-// handles events when player 2 makes a selection, saves it in firebase
+//--------records playerTwo's choice, calls function to see if both players have made a choice----//
 $(document).on("click", ".rockPaperScissorsTwo", function() {
 	round++; // increments the round for player selection
 	var userChoice = $(this).attr("data-rps");
@@ -264,7 +295,7 @@ $(document).on("click", ".rockPaperScissorsTwo", function() {
 	whoWonIt();
 })
 
-// checks to see if both players have made selections, calls the compare function when true
+//-------------checks for player choices, when both true, passes choices to compare function------//
 function whoWonIt() {
 	database.ref().once("value").then(function(snapshot) {
 		var checkIfPlayerOneSelected = snapshot.child("playerOne").child("choice").exists();
@@ -280,7 +311,7 @@ function whoWonIt() {
 	})
 }
 
-// Compares the RPS choices of both users and determines winner.
+//-------------------determines who won or tied based on RPS choice-----------------//
 function compareRPS(val1, val2) {
 	if (val1 === val2) {
 		$("#result").empty();
@@ -288,8 +319,6 @@ function compareRPS(val1, val2) {
 		var p = $("<p>");
 		p.text(status).addClass("resultsDivText").appendTo("#result");
 		resetChoices();
-
-		// find a way to call showWhatYouPicked();
 
 		database.ref("status").update({
 			status: status
@@ -327,7 +356,7 @@ function compareRPS(val1, val2) {
  	}
 }
 
-// Function to check current database wins/losses, increment to new values, update in database
+//-------------increments wins/losses and sets those values in firebase--------------//
 function incrementWinLoss(playerWin, playerLoss) {
 	if (playerWin === "playerOne") {
 		database.ref().once("value").then(function(snapshot) {
@@ -381,6 +410,7 @@ function incrementWinLoss(playerWin, playerLoss) {
 	}
 }
 
+//---------------------writes choices to the page and calls function to reset round--------//
 function showWhatYouPicked(status, choiceRight, choiceLeft) {
 	var pStatus = $("<p>");
 	var pResultRight = $("<p>");
@@ -393,31 +423,32 @@ function showWhatYouPicked(status, choiceRight, choiceLeft) {
 	resetChoices();
 }
 
+//------------resets the choices and restarts a new round----------//
 function resetChoices() {
 	timer = setTimeout(emptyTheDiv, 2500);
 	round++;
-
-	function emptyTheDiv() {
-		var status = "Ready, set, go!";
-
-		database.ref("status").update({
-			status: status,	
-			round: round
-		});	
-
-		clearTimeout(timer);
-	}
-
 	database.ref("playerOne/choice").remove();
 	database.ref("playerTwo/choice").remove();
+
+	emptyTheDiv(round);
 }
 
+function emptyTheDiv(round) {
+	var status = "Ready, set, go again!";
+	database.ref("status").update({
+		status: status,	
+		round: round
+	});	
+
+	clearTimeout(timer);
+}
+
+//-------------Chat functions and listeners------------------//
 $(document).ready(function() {
 	$("#submit").on("click", function() {
 		var chatMessage = $("#user-words").val().trim();
 		$("#user-words").val("");
 		var sender = currentPlayerName;
-		console.log(sender + " says " + chatMessage);
 
 		database.ref("chat").push({
 			message: chatMessage,
@@ -427,6 +458,17 @@ $(document).ready(function() {
 	})
 })
 
-// OnDisconnect function to handle when one player leaves
-	// Reset wins and losses for all players.
-	// Allow new player to join as Player One or Player Two  
+database.ref("chat").on("child_added", function(snapshot) {
+	var chatBox = $("#say-it")[0];
+	var message = snapshot.val().message;
+	var sender = snapshot.val().sender;
+	var player = snapshot.val().player;
+	var chatText = $("<p>");
+	var isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+	chatText.text(sender + ": " + message).appendTo(chatBox);	
+
+	// Makes sure the chat is scrolled to the bottom when chat overflow happens
+	if (isScrolledToBottom) { 
+		chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
+	}
+})

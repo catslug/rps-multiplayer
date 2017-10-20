@@ -23,6 +23,39 @@ header {
 	height: 150px;
 }
 
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 9999;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(245, 126, 107, 0.8);
+}
+
+.modalContent {
+	margin: 15% auto;
+	padding: 20px;
+	width: 80%;
+	color: black;
+	font-size: 70px;
+}
+
+span.close {
+	color: black;
+	float: right;
+	font-size: 80px;
+	top: 0;
+	right: 0;
+	padding: 30px;
+}
+
+.close:hover, .close:focus {
+	font-size: 100px;
+	transition: all 0.5s;
+}
+
 .container {
 	width: 100%;
 	height: 90vh;
@@ -105,6 +138,7 @@ header {
 	background-color: transparent;
 }
 
+/*------------buttons & inputs------------*/
 input#name-input, input#user-words {
 	border-bottom: 3px solid #f57e6b;
 	border-top: transparent;
@@ -118,21 +152,30 @@ input#name-input:focus, input#user-words:focus {
 	outline: none;
 }
 
-button#startBtn, button#submit {
+a#refresh, a#refresh:hover, a#refresh:focus, a#refresh:active {
+	color: #fff;
+}
+
+button#reset {
+	text-decoration: none;
+}
+
+button#startBtn, button#submit, button#reset {
 	background-color: #f57e6b;
 	color: #fff;
 	padding: 10px;
 	margin: 10px;
 }
 
-button#startBtn:hover, button#submit:hover {
+button#startBtn:hover, button#submit:hover, button#reset:hover {
 	background-color: #ffafa3;
 }
 
-button#startBtn:focus, button #submit:hover {
+button#startBtn:focus, button#submit:focus, button#reset:focus {
 	background-color: #ffafa3;
 }
 
+/*--------chat box----------*/
 #say-it {
 	height: 300px;	
 	border: 5px solid #f57e6b;
@@ -143,5 +186,4 @@ button#startBtn:focus, button #submit:hover {
 	background-color: #f5efee;
 	padding: 10px;
 	overflow: scroll; 
-	/*but this won't keep the chat focused ont he bottom*/
 }
