@@ -78,6 +78,7 @@ database.ref("status").on("value", function(snapshot) {
 database.ref("status/round").on("value", function(snapshot) {
 	var currentRound = snapshot.val();
 	if (currentRound === 3) {
+		$(".userPickedMe").remove();
 		$(".rps-div-right").removeClass("hideRPSChoices");
 		$(".rps-div-left").removeClass("hideRPSChoices");
 		$(".userPickedMe").remove();
@@ -427,19 +428,18 @@ function showWhatYouPicked(status, choiceRight, choiceLeft) {
 function resetChoices() {
 	timer = setTimeout(emptyTheDiv, 2500);
 	round++;
+	console.log("line 430 round: " + round)
 	database.ref("playerOne/choice").remove();
 	database.ref("playerTwo/choice").remove();
-
-	emptyTheDiv(round);
 }
 
-function emptyTheDiv(round) {
+function emptyTheDiv() {
 	var status = "Ready, set, go again!";
+
 	database.ref("status").update({
 		status: status,	
 		round: round
 	});	
-
 	clearTimeout(timer);
 }
 
