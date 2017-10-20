@@ -15,6 +15,7 @@ Settle age-old battles with another friend at the live link here: https://catslu
   * Bootstrap
   * Javascript
   * jQuery
+  * OdometerJS
   * Google Fonts
 
 ## Header Icons: 
