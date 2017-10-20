@@ -37,10 +37,10 @@ header {
 
 .modalContent {
 	margin: 15% auto;
-	padding: 20px;
+	padding: 64px;
 	width: 80%;
 	color: black;
-	font-size: 70px;
+	font-size: 33px;
 }
 
 span.close {
@@ -148,6 +148,10 @@ input#name-input, input#user-words {
 	padding: 10px;
 }
 
+input#user-words {
+	width: 35%;
+}
+
 input#name-input:focus, input#user-words:focus {
 	background-color: #f5efee;
 	outline: none;
@@ -158,6 +162,10 @@ a#refresh, a#refresh:hover, a#refresh:focus, a#refresh:active {
 }
 
 button#reset {
+	text-decoration: none;
+}
+
+button#reset:hover, button#reset:active, button#reset {
 	text-decoration: none;
 }
 

@@ -21,7 +21,7 @@ var currentPlayerName
 var modal = $("#myModal");
 var span = $(".close");
 
-//---------------------------Firebase database listeners--------------------------------//
+//-------------------------------Firebase listeners------------------------------------//
 
 // -------Listens for change in player name; if change bc disconnect, alerts player to restart------//
 database.ref("playerOne/playerName").on("value", function(snapshot) {
@@ -134,7 +134,7 @@ database.ref().on("value", function(snapshot) {
 	}
 })
 
-////////////////game listeners conclude////////////////////
+////////////////-------------------game listeners conclude-----------------////////////////////
 
 //---------------------modal---------------------//
 function closeModal() {
